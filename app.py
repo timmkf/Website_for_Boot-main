@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, join_room, disconnect
 from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room
-from game import cards
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
