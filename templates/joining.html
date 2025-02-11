@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="theme-color" content="rgb(62, 62, 62)">
+    <link rel="stylesheet" href= "{{ url_for('static', filename='joining-styles.css') }}">
+    <title>joining</title>
+  </head>
+  <body>
+    <h1>Joining</h1>
+    <a href="/">Go to Home Page</a>
+    <button id="Home">Home</button>
+    <form id="JoiningForm" method="post">
+      <p>Loby Code</p>
+      <input name="LobyCode" type="number" required placeholder="Enter Loby Code" min="100000" max="999999" autocomplete="off">
+      <p>Username</p>
+      <input name="Username" type="text" required placeholder="Gebe einen Benutzenamen ein." pattern="[A-Za-z]+" autocomplete="off">
+      <div id="IconSelector">
+        <button id="Icon1" type="button"></button>
+        <button id="Icon2" type="button"></button>
+        <button id="Icon3" type="button"></button>
+        <button id="Icon4" type="button"></button>
+        <br>
+        <button id="Icon5" type="button"></button>
+        <button id="Icon6" type="button"></button>
+        <button id="Icon7" type="button"></button>
+        <button id="Icon8" type="button"></button>
+        <input name="IconNumber" id="IconNumber" type="number" >
+      </div>
+      <button type="submit">Join</button>
+      <p id="Auswählen">Wähle ein Icon aus.</p>
+      <p>{{message}}</p>
+    </form>
+  </body>
+  <script src="{{ url_for('static', filename='joining-script.js') }}"></script>
+</html>

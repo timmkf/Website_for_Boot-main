@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="theme-color" content="rgb(62, 62, 62)">
+    <link rel="stylesheet" href= "{{ url_for('static', filename='config-styles.css') }}">
+    <title>Create a Session</title>
+  </head>
+  <body>
+    <h1>Create a Session</h1>
+    <a href="/">Go to Home Page</a>
+    <button id="Home">Home</button>
+    <form id="CreateSession" method="post">
+      <h2>Username</h2>
+      <input name="Username" type="text" required placeholder="Gebe einen Benutzenamen ein." pattern="[A-Za-z]+">
+      <div id="IconSelector">
+        <h2>Icon</h2>
+        <button id="Icon1" type="button"></button>
+        <button id="Icon2" type="button"></button>
+        <button id="Icon3" type="button"></button>
+        <button id="Icon4" type="button"></button>
+        <br>
+        <button id="Icon5" type="button"></button>
+        <button id="Icon6" type="button"></button>
+        <button id="Icon7" type="button"></button>
+        <button id="Icon8" type="button"></button>
+        <input id="IconNumber" name="IconNumber" type="number">
+      </div>
+
+      <div id="AusrichtungSelector">
+        <h2>Spielrichtung</h2>
+        <button id="AusrichtungButton" type="button"></button>
+        <img id="AusrichtungPyramide"> <!--auf dem bild sieht man eine pyramide darüber steht "Start" mit einem Pfeil der nach unten zeigt. Wenn man auf "AusrichtungButton" geht soll sich die Pyramide drehen so das die lange Seite oben ist. Drückt man ernneut drauf soll sich die Pyramide drehen so das die lange Seite unten ist. Ggf. soll analog bei der Pyramiden Auswähl sich die bilder ändern-->
+        <input id="AusrichtungInput" name="AusrichtungInput" type="text">
+      </div>
+
+      <div id="PyramidenSelector">
+        <h2>Pyramidengröße</h2>
+        <button id="viererPyramide" type="button"></button>
+        <button id="fünferPyramide" type="button"></button>
+        <button id="sechserPyramide" type="button"></button>
+        <button id="siebenerPyramide" type="button"></button>
+        <input id="Pyramidengroesse" name="Pyramidengroesse" type="number">
+      </div>
+
+      <div id="AnzahlKartenpPSelector">
+        <h2>Anzahl der Karten p.P.</h2>
+        <button id="eineKarten" type="button"></button>
+        <button id="zweiKarten" type="button"></button>
+        <button id="dreiKarten" type="button"></button>
+        <button id="vierKarten" type="button"></button>
+        <input id="AnzahlKarten" name="AnzahlKarten" type="number">
+      </div>
+
+      <div id="EndBootSelector">
+        <h2>Ende des Bootes</h2>
+        <button id="End1" type="button"></button>
+        <button id="End2" type="button"></button>
+        <button id="End3" type="button"></button>
+        <input id="EndBoot" name="EndBoot" type="number">
+      </div>
+
+      <button id="Create" type="submit">Create</button>
+      <p id="AuswählenIcon">Wähle ein Icon aus.</p>
+      <p id="AuswählenPyramide">Wähle eine Pyramidengröße aus.</p>
+      <p id="AuswählenAnzahl">Wähle die Anzahl der Karten p.P. aus.</p>
+      <p id="AuswählenEnde">Wähle das Ende des Bootes aus.</p>
+    </form>
+  </body>
+  <script src="{{ url_for('static', filename='config-script.js') }}"></script>
+</html>
