@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, join_room, disconnect
-from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room
+from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room, change_room_status, check_room_status
 
 
 app = Flask(__name__)
@@ -30,7 +30,8 @@ def joining():
         RoomNumber = int(request.form['LobyCode'])
         Username = request.form['Username']
         Mitspieler_Liste = find_Mitspieler_list(RoomNumber)
-        if RoomNumber in existing_rooms and Username not in Mitspieler_Liste:
+        Room_Status = check_room_status(RoomNumber)
+        if RoomNumber in existing_rooms and Username not in Mitspieler_Liste and Room_Status == 'Loby':
             IconNumber = request.form['IconNumber']
             User_id = save_user(RoomNumber, Username, IconNumber)
             session['Username'] = Username
@@ -123,6 +124,7 @@ def handle_disconnect():
 
 @socketio.on('game_start')
 def handle_game_start(data):
+    change_room_status(data['RoomNumber'])
     new_content = render_template('playground.html')
     socketio.emit('render_game_template',{'new_container': new_content}, room = data['RoomNumber'])
     

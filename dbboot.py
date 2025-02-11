@@ -28,7 +28,7 @@ def create_room(AusrichtungInput, Pyramidengroesse, AnzahlKarten, EndBoot, Usern
     RoomNumber = generate_unique_roomnumber()
     #es kann zu Problemen mit der RoomNumber kommen wenn später gleichzeitig einen room eröffnen, deswegen später room als id und room für save_user finden mithilfe von admin
     User_id = save_user(RoomNumber, Username, IconNumber)
-    room_collection.insert_one({'RoomNumber':RoomNumber, 'AusrichtungInput':AusrichtungInput, 'Pyramidengroesse':Pyramidengroesse, 'AnzahlKarten':AnzahlKarten, 'EndBoot':EndBoot, 'Admin':User_id })
+    room_collection.insert_one({'RoomNumber':RoomNumber, 'AusrichtungInput':AusrichtungInput, 'Pyramidengroesse':Pyramidengroesse, 'AnzahlKarten':AnzahlKarten, 'EndBoot':EndBoot, 'Admin':User_id, 'Status': 'Loby' })
     return RoomNumber, User_id
 
 def find_user_and_check_sid(User_id):
@@ -66,6 +66,17 @@ def find_room_admin(RoomNumber):
     Admin_id = Room['Admin']
     Admin_name = users_collection.find_one({'_id': Admin_id})['Username']
     return Admin_name, Admin_id
+
+def change_room_status(RoomNumber):
+    room_collection.find_one_and_update({'RoomNUmber': int(RoomNumber)},{'$set': {'Status': 'InGame'}})
+
+def check_room_status(RoomNumber):
+    Room_status = room_collection.find_one({'RoomNumber': RoomNumber})
+    if Room_status:
+        return(Room_status['Status'])
+    else:
+        return(False)
+
 
 def fill_deck():
     deck_collection.insert_many([{
