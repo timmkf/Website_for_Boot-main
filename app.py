@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, join_room, disconnect
-from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room, change_room_status, check_room_status
+from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room, change_room_status, check_room_status, create_game_in_db
 
 
 app = Flask(__name__)
@@ -39,14 +39,18 @@ def joining():
             session['User_id'] = str(User_id)
             
             return redirect(url_for('loby', RoomNumber = RoomNumber))
-        elif Username in Mitspieler_Liste:
-            message = "Ein Spieler in diesem Raum hat bereits diesen Nutzernamen, ändere deinen um beitreten zu können!"
-            return render_template('joining.html', message = message)
         elif RoomNumber not in existing_rooms:
             message = "Diesen Room gibt es nicht!"
             return render_template('joining.html', message = message)
+        elif Room_Status == 'InGame':
+            message = "Der Room ist gerade mitten in einem Spiel!"
+            return render_template('joining.html', message = message)
+        elif Username in Mitspieler_Liste:
+            message = "Ein Spieler in diesem Raum hat bereits diesen Nutzernamen, ändere deinen um beitreten zu können!"
+            return render_template('joining.html', message = message)
     else:
         return render_template('joining.html', message = message)
+    
 
 @app.route('/config', methods=['GET', 'POST'])
 def config():
@@ -110,21 +114,33 @@ def handle_join_room_event(data):
 def handle_disconnect():
     Sid = request.sid
     RoomNumber = users_collection.find_one({'Sid': Sid})['RoomNumber']
-    find_and_delete_disconnected_user(Sid)
+    disconnected_User_id = find_and_delete_disconnected_user(Sid)
+    current_Admin_id = find_room_admin(RoomNumber)[1]
+    print(type(current_Admin_id), type(disconnected_User_id), disconnected_User_id)
     Mitspieler_Liste = find_Mitspieler_list(RoomNumber)
     session.clear()
-    if Mitspieler_Liste:
+    if Mitspieler_Liste and current_Admin_id == disconnected_User_id:
         change_roomAdmin(RoomNumber)
         Admin_name_and_id = find_room_admin(RoomNumber)
         Admin_name = Admin_name_and_id[0]
         Admin_id = str(Admin_name_and_id[1])
         socketio.emit('update_list', {'Mitspieler_Liste': Mitspieler_Liste, 'Admin_name': Admin_name, 'Admin_id': Admin_id}, room = str(RoomNumber))
+        
+    elif Mitspieler_Liste and current_Admin_id != disconnected_User_id:
+        Admin_name_and_id = find_room_admin(RoomNumber)
+        Admin_name = Admin_name_and_id[0]
+        Admin_id = str(Admin_name_and_id[1])
+        socketio.emit('update_list', {'Mitspieler_Liste': Mitspieler_Liste, 'Admin_name': Admin_name, 'Admin_id': Admin_id}, room = str(RoomNumber))
+
     else:
         close_room(RoomNumber)
+    
+    #if Mitspieler_Liste<
 
 @socketio.on('game_start')
 def handle_game_start(data):
     change_room_status(data['RoomNumber'])
+    create_game_in_db(data['RoomNumber'])
     new_content = render_template('playground.html')
     socketio.emit('render_game_template',{'new_container': new_content}, room = data['RoomNumber'])
     

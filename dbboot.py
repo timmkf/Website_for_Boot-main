@@ -54,7 +54,9 @@ def find_Mitspieler_list(RoomNumber):
     return [user['Username'] for user in Mitspieler_list]
 
 def find_and_delete_disconnected_user(Sid):
+    User_id = users_collection.find_one({'Sid': Sid},{'_id': 1})
     users_collection.delete_one({'Sid': Sid})
+    return User_id['_id']
 
 def change_roomAdmin(RoomNumber):
     NewAdmin_id = users_collection.find_one({"RoomNumber": RoomNumber})['_id']
@@ -68,7 +70,7 @@ def find_room_admin(RoomNumber):
     return Admin_name, Admin_id
 
 def change_room_status(RoomNumber):
-    room_collection.find_one_and_update({'RoomNUmber': int(RoomNumber)},{'$set': {'Status': 'InGame'}})
+    room_collection.find_one_and_update({'RoomNumber': int(RoomNumber)},{'$set': {'Status': 'InGame'}})
 
 def check_room_status(RoomNumber):
     Room_status = room_collection.find_one({'RoomNumber': RoomNumber})
@@ -77,6 +79,9 @@ def check_room_status(RoomNumber):
     else:
         return(False)
 
+def create_game_in_db(RoomNumber):
+    Mitspieler_list = find_Mitspieler_list(RoomNumber)
+    games_collection.insert_one({'_id': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0]})
 
 def fill_deck():
     deck_collection.insert_many([{
