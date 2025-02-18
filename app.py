@@ -114,9 +114,8 @@ def handle_join_room_event(data):
 def handle_disconnect():
     Sid = request.sid
     RoomNumber = users_collection.find_one({'Sid': Sid})['RoomNumber']
-    disconnected_User_id = find_and_delete_disconnected_user(Sid)
     current_Admin_id = find_room_admin(RoomNumber)[1]
-    print(type(current_Admin_id), type(disconnected_User_id), disconnected_User_id)
+    disconnected_User_id = find_and_delete_disconnected_user(Sid)
     Mitspieler_Liste = find_Mitspieler_list(RoomNumber)
     session.clear()
     if Mitspieler_Liste and current_Admin_id == disconnected_User_id:
@@ -135,7 +134,9 @@ def handle_disconnect():
     else:
         close_room(RoomNumber)
     
-    #if Mitspieler_Liste<
+    if check_room_status(RoomNumber) == 'InGame' and len(Mitspieler_Liste) <=1 :
+        print(change_room_status(RoomNumber))
+
 
 @socketio.on('game_start')
 def handle_game_start(data):

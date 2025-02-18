@@ -28,12 +28,15 @@ socket.on('update_list', function (data){
     let AdminName = document.querySelector('#Admin')
     AdminName.textContent = data.Admin_name
     let Adminid = data.Admin_id
-    if (Adminid === User_id & data.Mitspieler_Liste.length >1){
+    if (Adminid === User_id && data.Mitspieler_Liste.length >1){
         let Start_Button = document.querySelector('#Start');
         Start_Button.style.backgroundColor = "green";
         Start_Button.style.pointerEvents = "auto";  
         Start_Button.onclick= Game_Start
-    }
+    }else{
+        let Start_Button = document.querySelector('#Start');
+        Start_Button.style.backgroundColor = "gray";
+        Start_Button.style.pointerEvents = "none";  }
 ;
 });
 
