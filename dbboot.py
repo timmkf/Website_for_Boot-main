@@ -28,7 +28,7 @@ def create_room(AusrichtungInput, Pyramidengroesse, AnzahlKarten, EndBoot, Usern
     RoomNumber = generate_unique_roomnumber()
     #es kann zu Problemen mit der RoomNumber kommen wenn später gleichzeitig einen room eröffnen, deswegen später room als id und room für save_user finden mithilfe von admin
     User_id = save_user(RoomNumber, Username, IconNumber)
-    room_collection.insert_one({'RoomNumber':RoomNumber, 'AusrichtungInput':AusrichtungInput, 'Pyramidengroesse':Pyramidengroesse, 'AnzahlKarten':AnzahlKarten, 'EndBoot':EndBoot, 'Admin':User_id, 'Status': 'Loby' })
+    room_collection.insert_one({'RoomNumber':RoomNumber, 'AusrichtungInput':AusrichtungInput, 'Pyramidengroesse':Pyramidengroesse, 'AnzahlKarten':AnzahlKarten, 'EndBoot':EndBoot, 'Admin':User_id, 'Status': 'Loby', 'Game_id': None })
     return RoomNumber, User_id
 
 def find_user_and_check_sid(User_id):
@@ -81,7 +81,15 @@ def check_room_status(RoomNumber):
 
 def create_game_in_db(RoomNumber):
     Mitspieler_list = find_Mitspieler_list(RoomNumber)
-    games_collection.insert_one({'_id': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0]})
+    game_id = games_collection.insert_one({'RoomNumber': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0]})
+    room_collection.update_one({'RoomNumber': int(RoomNumber)}, 
+                                {'$set': {'Game_id': game_id.inserted_id}})
+
+def find_and_delete_game(RoomNumber):
+    game_id = room_collection.find_one({'RoomNumber': int(RoomNumber)}, {'Game_id': 1})
+    if game_id:
+        games_collection.delete_one({'Game_id': ObjectId(game_id)})
+
 
 def fill_deck():
     deck_collection.insert_many([{
@@ -211,10 +219,16 @@ def delete_all_useres():
 
 def delete_all_rooms():
     room_collection.delete_many({})
+
+def delete_all_games():
+    games_collection.delete_many({})
+    
     
 #delete_all_useres()
 
 #delete_all_rooms()
+
+#delete_all_games()
 
 #fill_deck()
 
