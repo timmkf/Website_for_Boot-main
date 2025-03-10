@@ -69,8 +69,8 @@ def find_room_admin(RoomNumber):
     Admin_name = users_collection.find_one({'_id': Admin_id})['Username']
     return Admin_name, Admin_id
 
-def change_room_status(RoomNumber):
-    room_collection.find_one_and_update({'RoomNumber': int(RoomNumber)},{'$set': {'Status': 'InGame'}})
+def change_room_status(RoomNumber, newStatus):
+    room_collection.find_one_and_update({'RoomNumber': int(RoomNumber)},{'$set': {'Status': newStatus}})
 
 def check_room_status(RoomNumber):
     Room_status = room_collection.find_one({'RoomNumber': RoomNumber})
@@ -88,7 +88,8 @@ def create_game_in_db(RoomNumber):
 def find_and_delete_game(RoomNumber):
     game_id = room_collection.find_one({'RoomNumber': int(RoomNumber)}, {'Game_id': 1})
     if game_id:
-        games_collection.delete_one({'Game_id': ObjectId(game_id)})
+        games_collection.delete_one({'_id': game_id['Game_id']})
+        room_collection.update_one({'RoomNumber': int(RoomNumber)}, {'$set': {'Game_id': None}})
 
 
 def fill_deck():

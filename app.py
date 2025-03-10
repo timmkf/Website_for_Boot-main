@@ -135,14 +135,15 @@ def handle_disconnect():
         close_room(RoomNumber)
     
     if check_room_status(RoomNumber) == 'InGame' and len(Mitspieler_Liste) <=1 :
-        print(RoomNumber)
         find_and_delete_game(RoomNumber)
-        print(change_room_status(RoomNumber))
-
+        change_room_status(RoomNumber, 'Loby')
+        new_content = render_template('loby.html', RoomNumber = RoomNumber)
+        socketio.emit('render_loby_template',{'new_container': new_content}, room = str(RoomNumber))
+        socketio.emit('update_list', {'Mitspieler_Liste': Mitspieler_Liste, 'Admin_name': Admin_name, 'Admin_id': Admin_id}, room = str(RoomNumber))
 
 @socketio.on('game_start')
 def handle_game_start(data):
-    change_room_status(data['RoomNumber'])
+    change_room_status(data['RoomNumber'], 'InGame')
     create_game_in_db(data['RoomNumber'])
     new_content = render_template('playground.html')
     socketio.emit('render_game_template',{'new_container': new_content}, room = data['RoomNumber'])

@@ -40,9 +40,10 @@ socket.on('update_list', function (data){
 ;
 });
 
-const LeaveButton = document.querySelector("#Leave");
-LeaveButton.onclick = Leave
-
+document.addEventListener("click", function(event) {
+    if (event.target.id === "Leave") {
+        Leave();
+    }})
 function Leave(){
     window.location="/leave"
 }
@@ -54,3 +55,10 @@ function Game_Start(){
 socket.on('render_game_template',function(data){
     game_container.innerHTML = data.new_container
 })
+
+socket.on('render_loby_template',function(data){
+    game_container.innerHTML = data.new_container
+}
+)
+
+
