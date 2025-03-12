@@ -81,9 +81,10 @@ def check_room_status(RoomNumber):
 
 def create_game_in_db(RoomNumber):
     Mitspieler_list = find_Mitspieler_list(RoomNumber)
-    game_id = games_collection.insert_one({'RoomNumber': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0]})
+    game_id = games_collection.insert_one({'RoomNumber': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0], 'cards': None, 'Kartenverteilung': None})
     room_collection.update_one({'RoomNumber': int(RoomNumber)}, 
                                 {'$set': {'Game_id': game_id.inserted_id}})
+    return game_id.inserted_id
 
 def find_and_delete_game(RoomNumber):
     game_id = room_collection.find_one({'RoomNumber': int(RoomNumber)}, {'Game_id': 1})
@@ -91,6 +92,28 @@ def find_and_delete_game(RoomNumber):
         games_collection.delete_one({'_id': game_id['Game_id']})
         room_collection.update_one({'RoomNumber': int(RoomNumber)}, {'$set': {'Game_id': None}})
 
+def assign_cards(RoomNumber, game_id):
+    Mitspieler_list = find_Mitspieler_list(RoomNumber)
+    room_infos = room_collection.find_one({'RoomNumber': int(RoomNumber)})
+    AnzahlKarten = room_infos['AnzahlKarten']
+    Pyramidengroesse = room_infos['Pyramidengroesse']
+    Gesamtanzahl_Karten = len(Mitspieler_list) * int(AnzahlKarten)
+    if Pyramidengroesse == "4":
+        Gesamtanzahl_Karten += 10
+    elif Pyramidengroesse == "5":
+        Gesamtanzahl_Karten += 15
+    elif Pyramidengroesse == "6":  
+        Gesamtanzahl_Karten += 21
+    else:
+        Gesamtanzahl_Karten += 28
+    if Gesamtanzahl_Karten <=32:
+        deck = deck_collection.find_one({'_id': 'skat_standard'})['cards']
+        games_collection.find_one_and_update({'_id': ObjectId(game_id)},{'$set': {'cards': deck}})
+    else:
+        deck = deck_collection.find_one({'_id': 'skat_2decks'})['cards']
+        games_collection.find_one_and_update({'_id': ObjectId(game_id)},{'$set': {'cards': deck}})
+
+    #for ... hier steht die schleife für das kartenverteilungs array wahrscheinlich for in for schleife
 
 def fill_deck():
     deck_collection.insert_many([{
