@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, join_room, disconnect
-from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room, change_room_status, check_room_status, create_game_in_db, find_and_delete_game, assign_cards
+from dbboot import save_user, create_room, users_collection, room_collection, find_Mitspieler_list, find_user_and_check_sid, update_sid, find_and_delete_disconnected_user, find_room_admin, change_roomAdmin, close_room, change_room_status, check_room_status, create_game_in_db, find_and_delete_game, assign_cards, create_pyramide
 
 
 app = Flask(__name__)
@@ -147,6 +147,7 @@ def handle_game_start(data):
     game_id = create_game_in_db(data['RoomNumber'])
     new_content = render_template('playground.html')
     assign_cards(data['RoomNumber'], game_id)
+    create_pyramide(data['RoomNumber'], game_id)
     socketio.emit('render_game_template',{'new_container': new_content}, room = data['RoomNumber'])
     
 
