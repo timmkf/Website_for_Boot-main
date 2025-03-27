@@ -115,40 +115,52 @@ def assign_cards(RoomNumber, game_id):
         games_collection.find_one_and_update({'_id': ObjectId(game_id)},{'$set': {'cards': deck}})
 
     #for ... hier steht die schleife für das kartenverteilungs array wahrscheinlich for in for schleife
+    random_deck = games_collection.find_one({'_id': ObjectId(game_id)})['cards']
+    random.shuffle(random_deck)
+    
     Kartenverteilung_array = []
     for Name in Mitspieler_list:
         Karten_array = []
         for i in range(int(AnzahlKarten)):
-            deck = games_collection.find_one({'_id': ObjectId(game_id)})['cards']
-            deck_length = len(deck)
-            random_number = random.randint(0, deck_length -1 )
-            random_card = deck[random_number]
-            Karten_array.append(random_card)
-            games_collection.update_one({"_id": ObjectId(game_id)}, {"$pull": {"cards": random_card}})
-
-        Kartenverteilung_array.append({"Name": Name, "Karten": Karten_array})    
-    games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Kartenverteilung': Kartenverteilung_array}})
+            Karten_array.append(random_deck.pop(0))
+    
+        Kartenverteilung_array.append({"Name": Name, "Karten": Karten_array})
+        
+    games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Kartenverteilung': Kartenverteilung_array, 'cards': random_deck}})
+    print('random deck:', random_deck, 'Kartenverteilung', Kartenverteilung_array)
     
 def create_pyramide(RoomNumber, game_id):
     room_infos = room_collection.find_one({'RoomNumber': int(RoomNumber)})
     Pyramidengroesse = room_infos['Pyramidengroesse']
 
-    Pyramide_array = []
-    for Zeile in range(1, int(Pyramidengroesse)+1):
-        Zeilen_array = []
-        for i in range(Zeile):
-            deck = games_collection.find_one({'_id': ObjectId(game_id)})['cards']
-            deck_length = len(deck)
-            random_number = random.randint(0, deck_length -1 )
-            random_card = deck[random_number]
-            Zeilen_array.append(random_card)
-            games_collection.update_one({"_id": ObjectId(game_id)}, {"$pull": {"cards": random_card}})
-        Pyramide_array.append({'Zeile': Zeile, 'Karten': Zeilen_array})
+    random_deck = games_collection.find_one({'_id': ObjectId(game_id)})['cards']
+    random.shuffle(random_deck)
 
-    games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Pyramide': Pyramide_array}})
-    print(Pyramide_array)
-    print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+    if room_infos['AusrichtungInput'] == 'AusrichtungInput':
+        Pyramide_array = []
+        for Zeile in range(1, int(Pyramidengroesse)+1):
+            Zeilen_array = []
+            for i in range(Zeile):
+                Zeilen_array.append(random_deck.pop(0))
+            
+            Pyramide_array.append({'Zeile': Zeile, 'Karten': Zeilen_array})
 
+        games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Pyramide': Pyramide_array, 'cards': random_deck}})
+        print(Pyramide_array)
+        print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+    
+    else: 
+        Pyramide_array = []
+        for Zeile in range(int(Pyramidengroesse), 0, -1):
+            Zeilen_array = []
+            for i in range(Zeile):
+                Zeilen_array.append(random_deck.pop(0))
+            
+            Pyramide_array.append({'Zeile': Zeile, 'Karten': Zeilen_array})
+
+        games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Pyramide': Pyramide_array, 'cards': random_deck}})
+        print(Pyramide_array)
+        print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
 
 def fill_deck():
     deck_collection.insert_many([{
