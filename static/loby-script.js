@@ -54,6 +54,7 @@ function Game_Start(){
 
 socket.on('render_game_template',function(data){
     game_container.innerHTML = data.new_container
+    
 })
 
 socket.on('render_loby_template',function(data){

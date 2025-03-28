@@ -53,6 +53,10 @@ def find_Mitspieler_list(RoomNumber):
     Mitspieler_list = users_collection.find({'RoomNumber': int(RoomNumber)}, {'_id': 0, 'Username': 1})
     return [user['Username'] for user in Mitspieler_list]
 
+def find_Mitspieler_list_with_id(RoomNumber):
+    Mitspieler_list = users_collection.find({'RoomNumber': int(RoomNumber)}, {'Username': 1, '_id': 1})
+    return [{'Username': user['Username'], 'User_id': str(user['_id'])} for user in Mitspieler_list]
+
 def find_and_delete_disconnected_user(Sid):
     User_id = users_collection.find_one({'Sid': Sid},{'_id': 1})
     users_collection.delete_one({'Sid': Sid})
@@ -80,8 +84,8 @@ def check_room_status(RoomNumber):
         return(False)
 
 def create_game_in_db(RoomNumber):
-    Mitspieler_list = find_Mitspieler_list(RoomNumber)
-    game_id = games_collection.insert_one({'RoomNumber': int(RoomNumber), 'players': Mitspieler_list, 'status': 'running', "turn": Mitspieler_list[0], 'cards': None, 'Kartenverteilung': None, 'Pyramide': None})
+    Mitspieler_list_with_id = find_Mitspieler_list_with_id(RoomNumber)
+    game_id = games_collection.insert_one({'RoomNumber': int(RoomNumber), 'players': Mitspieler_list_with_id, 'status': 'running', "turn": Mitspieler_list_with_id[0], 'cards': None, 'Kartenverteilung': None, 'Pyramide': None})
     room_collection.update_one({'RoomNumber': int(RoomNumber)}, 
                                 {'$set': {'Game_id': game_id.inserted_id}})
     return game_id.inserted_id
@@ -93,7 +97,7 @@ def find_and_delete_game(RoomNumber):
         room_collection.update_one({'RoomNumber': int(RoomNumber)}, {'$set': {'Game_id': None}})
 
 def assign_cards(RoomNumber, game_id):
-    Mitspieler_list = find_Mitspieler_list(RoomNumber)
+    Mitspieler_list = find_Mitspieler_list_with_id(RoomNumber) 
     room_infos = room_collection.find_one({'RoomNumber': int(RoomNumber)})
     AnzahlKarten = room_infos['AnzahlKarten']
     Pyramidengroesse = room_infos['Pyramidengroesse']
@@ -119,15 +123,16 @@ def assign_cards(RoomNumber, game_id):
     random.shuffle(random_deck)
     
     Kartenverteilung_array = []
-    for Name in Mitspieler_list:
+    for Player in Mitspieler_list:
+        User_id = Player['User_id']
         Karten_array = []
         for i in range(int(AnzahlKarten)):
             Karten_array.append(random_deck.pop(0))
     
-        Kartenverteilung_array.append({"Name": Name, "Karten": Karten_array})
+        Kartenverteilung_array.append({"User_id": User_id, "Karten": Karten_array})
         
     games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Kartenverteilung': Kartenverteilung_array, 'cards': random_deck}})
-    print('random deck:', random_deck, 'Kartenverteilung', Kartenverteilung_array)
+    return Kartenverteilung_array
     
 def create_pyramide(RoomNumber, game_id):
     room_infos = room_collection.find_one({'RoomNumber': int(RoomNumber)})
@@ -146,8 +151,9 @@ def create_pyramide(RoomNumber, game_id):
             Pyramide_array.append({'Zeile': Zeile, 'Karten': Zeilen_array})
 
         games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Pyramide': Pyramide_array, 'cards': random_deck}})
-        print(Pyramide_array)
-        print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+        #print(Pyramide_array)
+        #print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+        return Pyramide_array
     
     else: 
         Pyramide_array = []
@@ -159,8 +165,9 @@ def create_pyramide(RoomNumber, game_id):
             Pyramide_array.append({'Zeile': Zeile, 'Karten': Zeilen_array})
 
         games_collection.update_one({'_id': ObjectId(game_id)}, {'$set': {'Pyramide': Pyramide_array, 'cards': random_deck}})
-        print(Pyramide_array)
-        print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+        #print(Pyramide_array)
+        #print(games_collection.find_one({'_id': ObjectId(game_id)})['cards'])
+        return Pyramide_array
 
 def fill_deck():
     deck_collection.insert_many([{

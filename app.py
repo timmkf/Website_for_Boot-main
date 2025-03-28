@@ -146,9 +146,10 @@ def handle_game_start(data):
     change_room_status(data['RoomNumber'], 'InGame')
     game_id = create_game_in_db(data['RoomNumber'])
     new_content = render_template('playground.html')
-    assign_cards(data['RoomNumber'], game_id)
-    create_pyramide(data['RoomNumber'], game_id)
-    socketio.emit('render_game_template',{'new_container': new_content}, room = data['RoomNumber'])
+    Kartenverteilung_array = assign_cards(data['RoomNumber'], game_id)
+    Pyramide_array = create_pyramide(data['RoomNumber'], game_id)
+    Mitspieler_Liste = find_Mitspieler_list(data['RoomNumber'])
+    socketio.emit('render_game_template',{'new_container': new_content, 'Kartenverteilung': Kartenverteilung_array, 'Pyramide': Pyramide_array, 'Mitspieler_Liste': Mitspieler_Liste}, room = data['RoomNumber'])
     
 
 @app.route('/playground')
