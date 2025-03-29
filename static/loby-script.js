@@ -54,8 +54,26 @@ function Game_Start(){
 
 socket.on('render_game_template',function(data){
     game_container.innerHTML = data.new_container
-    
+    requestAnimationFrame(() => {
+        const players_cards_container = document.querySelector('#players_cards_container');
+        players_cards_container.innerHTML = ''; // Leeren, um alte Karten zu entfernen
+        data.Kartenverteilung.forEach(player => {
+            let playerDiv = document.createElement('div');
+            playerDiv.innerHTML = `<strong>${player.User_id}:</strong>`;
+
+            let cardList = document.createElement('ul');
+            player.Karten.forEach(card => {
+                let cardItem = document.createElement('li');
+                cardItem.textContent = `${card.suit} ${card.rank}`;
+                cardList.appendChild(cardItem);
+            });
+
+            playerDiv.appendChild(cardList);
+            players_cards_container.appendChild(playerDiv);
+        });
+    });
 })
+
 
 socket.on('render_loby_template',function(data){
     game_container.innerHTML = data.new_container
